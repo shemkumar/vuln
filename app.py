@@ -173,13 +173,13 @@ def stored_xss():
 @app.route("/ssti")
 def ssti():
     name = request.args.get("name", "")
-    # VULN: user input is compiled as a Jinja template
-    template = f"""
+    # FIX: Pass user input as a variable to the template, letting the templating engine handle escaping.
+    template = """
     <h1>SSTI Demo</h1>
-    <p>Hello {name}</p>
+    <p>Hello {{ name }}</p>
     <a href="/">Back</a>
     """
-    return render_template_string(template)
+    return render_template_string(template, name=name)
 
 
 # 5. SQL Injection
