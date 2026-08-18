@@ -30,7 +30,7 @@ Open:
 from flask import Flask, request, render_template_string, redirect, make_response
 import sqlite3
 import os
-import pickle
+import json
 import base64
 import requests
 
@@ -106,7 +106,7 @@ def home():
       <li><a href="/admin">RBAC Broken Access Control</a></li>
       <li><a href="/upload">Insecure File Upload</a></li>
       <li><a href="/debug-info">Security Misconfiguration</a></li>
-      <li><a href="/deserialize?data=gASVCwAAAAAAAACMB2hlbGxvlC4=">Insecure Deserialization</a></li>
+      <li><a href="/deserialize?data=ImhlbGxvIg%3D%3D">Insecure Deserialization</a></li>
       <li><a href="/fetch?url=http://127.0.0.1:5000/debug-info">Unsafe URL Fetch / SSRF demo</a></li>
     </ul>
     """
@@ -282,15 +282,14 @@ def debug_info():
     }
 
 
-# 10. Vulnerable Deserialization
+# 10. Deserialization (fixed: uses JSON instead of pickle for untrusted data)
 @app.route("/deserialize")
 def insecure_deserialize():
     data = request.args.get("data", "")
 
-    # VULN: unpickles user-controlled data
     try:
         raw = base64.b64decode(data)
-        obj = pickle.loads(raw)
+        obj = json.loads(raw)
         return f"<h1>Deserialized Object</h1><pre>{obj}</pre><a href='/'>Back</a>"
     except Exception as e:
         return f"Deserialize error: {e}", 400
