@@ -189,10 +189,10 @@ def sql_injection():
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
 
-    # VULN: direct string concatenation into SQL
-    sql = "SELECT id, name, price FROM products WHERE name LIKE '%" + q + "%'"
+    # FIX: Use parameterized queries to prevent SQL injection
+    sql = "SELECT id, name, price FROM products WHERE name LIKE ?"
     try:
-        rows = cur.execute(sql).fetchall()
+        rows = cur.execute(sql, ('%' + q + '%',)).fetchall()
     except Exception as e:
         rows = [(0, "SQL error", str(e))]
     conn.close()
